@@ -1,4 +1,5 @@
 export const handler = async (event) => {
+  throw 'Test DLQ'
   for (const message of event.Records) {
     await processMessageAsync(message)
   }
