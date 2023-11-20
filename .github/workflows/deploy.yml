@@ -1,0 +1,46 @@
+name: Build + Deploy Lambdas
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lambdas/**'
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # - name: Install Backend
+      #   run: yarn install
+      #   working-directory: ./backend
+
+      # - name: Test Backend
+      #   run: yarn test
+      #   working-directory: ./backend
+
+      - name: Zip lambda pub package
+        run: zip -rj lambda_pub_package.zip ./lambdas/event-generator
+
+      - name: Zip lambda package
+        run: zip -rj lambda_sub_package.zip ./lambdas/processor
+
+      - name: Configure AWS Credentials for Lambda Access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_LAMBDA_ROLE }}
+          role-duration-seconds: 900
+          aws-region: eu-west-2
+
+      - name: Deploy lambda
+        run: |
+          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_PUB }} --zip-file fileb://lambda_pub_package.zip
+          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_SUB }} --zip-file fileb://lambda_sub_package.zip
