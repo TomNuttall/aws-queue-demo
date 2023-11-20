@@ -31,7 +31,7 @@ jobs:
         run: zip -rj lambda_pub_package.zip ./lambdas/event-generator
 
       - name: Zip lambda package
-        run: zip -rj lambda_sub_package.zip ./lambdas/processor
+        run: zip -rj lambda_sub_package.zip ./lambdas/event-processor
 
       - name: Configure AWS Credentials for Lambda Access
         uses: aws-actions/configure-aws-credentials@v4
