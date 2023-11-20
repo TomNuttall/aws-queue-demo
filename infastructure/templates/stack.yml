@@ -1,0 +1,222 @@
+AWSTemplateFormatVersion: 2010-09-09
+Description: 'SNS, SQS and Lambdas'
+
+Parameters:
+  ProjectPrefix:
+    Type: String
+    Default: 'demo'
+    Description: 'Name of Project prefix'
+  ProjectName:
+    Type: String
+    Description: 'Name of Project'
+  ProjectRepo:
+    Type: 'String'
+    Description: 'Repo Path i.e GitHubUser/RepoName'
+  AlertEmail:
+    Type: String
+    Description: 'Alert email target'
+
+Resources:
+  LambdaEventGeneratorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectPrefix}-lambda-event-generator-${ProjectName}'
+      RetentionInDays: 14
+
+  LambdaEventGenerator:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: !Sub '${ProjectPrefix}-lambda-event-generator-${ProjectName}'
+      FunctionName: !Sub '${ProjectPrefix}-lambda-event-generator-${ProjectName}'
+      Code:
+        ZipFile: |
+          exports.handler = function(event, context) {
+            const response = {
+              statusCode: 200,
+              body: JSON.stringify({ 'msg': 'dummy api response' })
+            };
+            return response;
+          };
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaEventGeneratorRole.Arn
+
+  LambdaEventGeneratorRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-role-${ProjectName}-lambda-event-generator'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-lambda-event-generator-logs'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: logs:*
+                Resource: !GetAtt LambdaEventGeneratorLogGroup.Arn
+        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-lambda-event-generator-sns'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sns:Publish
+                Resource: !Ref SNSTopic
+
+  SNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub '${ProjectPrefix}-topic-${ProjectName}'
+      TopicName: !Sub '${ProjectPrefix}-topic-${ProjectName}'
+
+  SQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${ProjectPrefix}-queue-${ProjectName}'
+      #MessageRetentionPeriod
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 2
+
+  DeadLetterQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      QueueName: !Sub '${ProjectPrefix}-dead-letter-queue-${ProjectName}'
+
+  AlertTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      DisplayName: !Sub '${ProjectPrefix}-alert-topic-${ProjectName}'
+      TopicName: !Sub '${ProjectPrefix}-alert-topic-${ProjectName}'
+
+  AlertTopicSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Endpoint: !Sub '${AlertEmail}'
+      Protocol: email
+      TopicArn: !Ref AlertTopic
+
+  DeadLetterQueueAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+      AlarmName: !Sub '${ProjectPrefix}-alert-${ProjectName}'
+      Namespace: AWS/SQS
+      MetricName: ApproximateNumberOfMessagesVisible
+      Dimensions:
+        - Name: QueueName
+          Value: !Sub '${ProjectPrefix}-dead-letter-queue-${ProjectName}'
+      Statistic: Sum
+      Period: 60
+      EvaluationPeriods: 1
+      Threshold: 0
+      ComparisonOperator: GreaterThanThreshold
+      TreatMissingData: notBreaching
+      AlarmActions:
+        - !Ref AlertTopic
+
+  SNSSubscription:
+    Type: AWS::SNS::Subscription
+    Properties:
+      Protocol: sqs
+      Endpoint: !GetAtt SQSQueue.Arn
+      TopicArn: !Ref SNSTopic
+
+  LambdaProcessorEventSourceMapping:
+    Type: AWS::Lambda::EventSourceMapping
+    Properties:
+      EventSourceArn: !GetAtt SQSQueue.Arn
+      FunctionName: !GetAtt LambdaProcessor.Arn
+
+  LambdaProcessorLogGroup:
+    Type: AWS::Logs::LogGroup
+    Properties:
+      LogGroupName: !Sub '/aws/lambda/${ProjectPrefix}-lambda-processor-${ProjectName}'
+      RetentionInDays: 14
+
+  LambdaProcessor:
+    Type: 'AWS::Lambda::Function'
+    Properties:
+      Description: !Sub '${ProjectPrefix}-lambda-processor-${ProjectName}'
+      FunctionName: !Sub '${ProjectPrefix}-lambda-processor-${ProjectName}'
+      Code:
+        ZipFile: |
+          exports.handler = function(event, context) {
+            const response = {
+              statusCode: 200,
+              body: JSON.stringify({ 'msg': 'dummy api response' })
+            };
+            return response;
+          };
+      Runtime: nodejs18.x
+      Handler: index.handler
+      Role: !GetAtt LambdaProcessorRole.Arn
+
+  LambdaProcessorRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-role-${ProjectName}-lambda-processor'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Service:
+                - 'lambda.amazonaws.com'
+            Action:
+              - 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-lambda-processor-logs'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: logs:*
+                Resource: !GetAtt LambdaProcessorLogGroup.Arn
+        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-lambda-processor-sqs'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - sqs:ReceiveMessage
+                  - sqs:DeleteMessage
+                  - sqs:GetQueueAttributes
+                  - sqs:ChangeMessageVisibility
+                Resource: !GetAtt SQSQueue.Arn
+
+  GitHubActionRole:
+    Type: 'AWS::IAM::Role'
+    Properties:
+      RoleName: !Sub '${ProjectPrefix}-role-${ProjectName}-github-lambda'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: 'Allow'
+            Principal:
+              Federated:
+                - !Sub 'arn:aws:iam::${AWS::AccountId}:oidc-provider/token.actions.githubusercontent.com'
+            Action:
+              - 'sts:AssumeRoleWithWebIdentity'
+            Condition:
+              StringEquals:
+                token.actions.githubusercontent.com:aud: 'sts.amazonaws.com'
+              StringLike:
+                token.actions.githubusercontent.com:sub: !Sub 'repo:${ProjectRepo}:*'
+      Policies:
+        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-github-lambda'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: 'Allow'
+                Action: 'lambda:UpdateFunctionCode'
+                Resource:
+                  - !GetAtt LambdaEventGenerator.Arn
+                  - !GetAtt LambdaProcessor.Arn
