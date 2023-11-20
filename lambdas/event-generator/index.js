@@ -4,15 +4,10 @@ const snsClient = new SNSClient({})
 export const handler = async (event) => {
   const res = await snsClient.send(
     new PublishCommand({
-      Message: 'Tom Test',
+      Message: 'Test Message',
       TopicArn: process.env.TOPIC_ARN,
     }),
   )
 
-  const response = {
-    statusCode: 200,
-    body: 'Success',
-  }
-
-  return response
+  return res
 }
