@@ -35,7 +35,7 @@ jobs:
         working-directory: ./lambdas/event-processor
 
       - name: Zip Lambda
-        run: zip -rj lambda_pub_package.zip ./lambdas/event-processor/src
+        run: zip -rj lambda_package.zip ./lambdas/event-processor/src
 
       - name: Configure AWS Credentials for Lambda Access
         uses: aws-actions/configure-aws-credentials@v4
@@ -46,4 +46,4 @@ jobs:
 
       - name: Deploy lambda
         run: |
-          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_SUB }} --zip-file fileb://lambda_sub_package.zip
+          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_SUB }} --zip-file fileb://lambda_package.zip
