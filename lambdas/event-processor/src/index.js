@@ -1,7 +1,9 @@
 export const handler = async (event) => {
+  console.log(event)
+
   try {
     for (const message of event.Records) {
-      await processMessageAsync(message)
+      await processMessage(message)
     }
   } catch (err) {
     console.error('An error occurred')
@@ -16,12 +18,12 @@ export const handler = async (event) => {
   return response
 }
 
-const processMessageAsync = async (message) => {
+export const processMessage = async (message) => {
   console.log(`Processed message ${message.body}`)
 
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve()
-    }, 5000)
+      resolve(true)
+    }, 1000)
   })
 }
