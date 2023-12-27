@@ -1,0 +1,49 @@
+name: Build + Deploy event-processor
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lambdas/event-processor/**'
+
+jobs:
+  build-backend:
+    runs-on: ubuntu-latest
+
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
+
+      - name: Install dependencies
+        run: yarn install
+        working-directory: ./lambdas/event-processor
+
+      - name: Test Lambda
+        run: yarn test
+        working-directory: ./lambdas/event-processor
+
+      - name: Zip Lambda
+        run: zip -rj lambda_pub_package.zip ./lambdas/event-processor/src
+
+      - name: Configure AWS Credentials for Lambda Access
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_LAMBDA_ROLE }}
+          role-duration-seconds: 900
+          aws-region: eu-west-2
+
+      - name: Deploy lambda
+        run: |
+          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_SUB }} --zip-file fileb://lambda_sub_package.zip
