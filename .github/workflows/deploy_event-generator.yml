@@ -1,11 +1,11 @@
-name: Build + Deploy Lambdas
+name: Build + Deploy event-generator
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'lambdas/**'
+      - 'lambdas/event-generator/**'
 
 jobs:
   build-backend:
@@ -19,19 +19,23 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # - name: Install Backend
-      #   run: yarn install
-      #   working-directory: ./backend
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'yarn'
+          cache-dependency-path: '**/yarn.lock'
 
-      # - name: Test Backend
-      #   run: yarn test
-      #   working-directory: ./backend
+      - name: Install dependencies
+        run: yarn install
+        working-directory: ./lambdas/event-generator
 
-      - name: Zip lambda pub package
-        run: zip -rj lambda_pub_package.zip ./lambdas/event-generator
+      - name: Test Lambda
+        run: yarn test
+        working-directory: ./lambdas/event-generator
 
-      - name: Zip lambda package
-        run: zip -rj lambda_sub_package.zip ./lambdas/event-processor
+      - name: Zip Lambda
+        run: zip -rj lambda_pub_package.zip ./lambdas/event-generator/src
 
       - name: Configure AWS Credentials for Lambda Access
         uses: aws-actions/configure-aws-credentials@v4
@@ -43,4 +47,3 @@ jobs:
       - name: Deploy lambda
         run: |
           aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_PUB }} --zip-file fileb://lambda_pub_package.zip
-          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_SUB }} --zip-file fileb://lambda_sub_package.zip
