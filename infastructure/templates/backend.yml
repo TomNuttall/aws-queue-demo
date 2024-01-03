@@ -15,77 +15,122 @@ Parameters:
   AlertEmail:
     Type: String
     Description: 'Alert email target'
+  SubDomainName:
+    Type: 'String'
+    Description: 'Subdomain path'
+  HostedZoneId:
+    Type: 'String'
+    Description: 'Domain hosted id'
 
 Resources:
-  LambdaEventGeneratorLogGroup:
-    Type: AWS::Logs::LogGroup
+  SQSQueue:
+    Type: AWS::SQS::Queue
     Properties:
-      LogGroupName: !Sub '/aws/lambda/${ProjectPrefix}-lambda-event-generator-${ProjectName}'
-      RetentionInDays: 14
+      QueueName: !Sub '${ProjectPrefix}-queue-${ProjectName}'
+      ReceiveMessageWaitTimeSeconds: 20
+      RedrivePolicy:
+        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
+        maxReceiveCount: 2
 
-  LambdaEventGenerator:
-    Type: 'AWS::Lambda::Function'
+  Api:
+    Type: 'AWS::ApiGatewayV2::Api'
     Properties:
-      Description: !Sub '${ProjectPrefix}-lambda-event-generator-${ProjectName}'
-      FunctionName: !Sub '${ProjectPrefix}-lambda-event-generator-${ProjectName}'
-      Code:
-        ZipFile: |
-          exports.handler = function(event, context) {
-            const response = {
-              statusCode: 200,
-              body: JSON.stringify({ 'msg': 'dummy api response' })
-            };
-            return response;
-          };
-      Runtime: nodejs20.x
-      Handler: index.handler
-      Role: !GetAtt LambdaEventGeneratorRole.Arn
+      Name: !Sub '${ProjectPrefix}-api-${ProjectName}'
+      ProtocolType: 'HTTP'
+      CorsConfiguration:
+        AllowOrigins:
+          - '*'
+        AllowMethods:
+          - POST
 
-  LambdaEventGeneratorRole:
+  ApiCertificate:
+    Type: 'AWS::CertificateManager::Certificate'
+    Properties:
+      DomainName: !Ref SubDomainName
+      DomainValidationOptions:
+        - DomainName: !Ref SubDomainName
+          HostedZoneId: !Ref HostedZoneId
+      ValidationMethod: DNS
+
+  ApiDomain:
+    Type: 'AWS::ApiGatewayV2::DomainName'
+    Properties:
+      DomainName: !Ref SubDomainName
+      DomainNameConfigurations:
+        - EndpointType: 'REGIONAL'
+          CertificateArn: !Ref ApiCertificate
+
+  ApiMapping:
+    Type: 'AWS::ApiGatewayV2::ApiMapping'
+    Properties:
+      ApiId: !Ref Api
+      DomainName: !Ref SubDomainName
+      Stage: !Ref ApiStage
+    DependsOn:
+      - ApiDomain
+
+  RecordSet:
+    Type: 'AWS::Route53::RecordSet'
+    Properties:
+      HostedZoneId: !Ref HostedZoneId
+      Name: !Ref SubDomainName
+      Type: 'A'
+      AliasTarget:
+        DNSName: !GetAtt ApiDomain.RegionalDomainName
+        HostedZoneId: !GetAtt ApiDomain.RegionalHostedZoneId
+    DependsOn:
+      - Api
+
+  APIRole:
     Type: 'AWS::IAM::Role'
     Properties:
-      RoleName: !Sub '${ProjectPrefix}-role-${ProjectName}-lambda-event-generator'
+      RoleName: !Sub '${ProjectPrefix}-role-${ProjectName}-api'
       AssumeRolePolicyDocument:
         Version: '2012-10-17'
         Statement:
           - Effect: 'Allow'
             Principal:
               Service:
-                - 'lambda.amazonaws.com'
+                - 'apigateway.amazonaws.com'
             Action:
               - 'sts:AssumeRole'
       Policies:
-        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-lambda-event-generator-logs'
-          PolicyDocument:
-            Version: '2012-10-17'
-            Statement:
-              - Effect: 'Allow'
-                Action: logs:*
-                Resource: !GetAtt LambdaEventGeneratorLogGroup.Arn
-        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-lambda-event-generator-sns'
+        - PolicyName: !Sub '${ProjectPrefix}-policy-${ProjectName}-lambda-processor-sqs'
           PolicyDocument:
             Version: '2012-10-17'
             Statement:
               - Effect: Allow
                 Action:
-                  - sns:Publish
-                Resource: !Ref SNSTopic
+                  - sqs:SendMessage
+                Resource: !GetAtt SQSQueue.Arn
 
-  SNSTopic:
-    Type: AWS::SNS::Topic
+  ApiIntegration:
+    Type: 'AWS::ApiGatewayV2::Integration'
     Properties:
-      DisplayName: !Sub '${ProjectPrefix}-topic-${ProjectName}'
-      TopicName: !Sub '${ProjectPrefix}-topic-${ProjectName}'
+      ApiId: !Ref Api
+      IntegrationType: AWS_PROXY
+      IntegrationSubtype: 'SQS-SendMessage'
+      CredentialsArn: !GetAtt APIRole.Arn
+      PayloadFormatVersion: '1.0'
+      RequestParameters:
+        QueueUrl: !Ref SQSQueue
+        MessageBody: $request.body
 
-  SQSQueue:
-    Type: AWS::SQS::Queue
+  ApiRoute:
+    Type: 'AWS::ApiGatewayV2::Route'
     Properties:
-      QueueName: !Sub '${ProjectPrefix}-queue-${ProjectName}'
-      #MessageRetentionPeriod
-      ReceiveMessageWaitTimeSeconds: 20
-      RedrivePolicy:
-        deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
-        maxReceiveCount: 2
+      ApiId: !Ref Api
+      RouteKey: 'POST /'
+      Target: !Sub 'integrations/${ApiIntegration}'
+    DependsOn:
+      - ApiIntegration
+
+  ApiStage:
+    Type: 'AWS::ApiGatewayV2::Stage'
+    Properties:
+      ApiId: !Ref Api
+      AutoDeploy: true
+      StageName: 'dev'
 
   DeadLetterQueue:
     Type: AWS::SQS::Queue
@@ -124,13 +169,6 @@ Resources:
       AlarmActions:
         - !Ref AlertTopic
 
-  SNSSubscription:
-    Type: AWS::SNS::Subscription
-    Properties:
-      Protocol: sqs
-      Endpoint: !GetAtt SQSQueue.Arn
-      TopicArn: !Ref SNSTopic
-
   LambdaProcessorEventSourceMapping:
     Type: AWS::Lambda::EventSourceMapping
     Properties:
@@ -158,6 +196,8 @@ Resources:
             return response;
           };
       Runtime: nodejs20.x
+      Timeout: 60
+      MemorySize: 256
       Handler: index.handler
       Role: !GetAtt LambdaProcessorRole.Arn
 
@@ -220,5 +260,4 @@ Resources:
               - Effect: 'Allow'
                 Action: 'lambda:UpdateFunctionCode'
                 Resource:
-                  - !GetAtt LambdaEventGenerator.Arn
                   - !GetAtt LambdaProcessor.Arn
