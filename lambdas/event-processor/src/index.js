@@ -19,11 +19,25 @@ export const handler = async (event) => {
 }
 
 export const processMessage = async (message) => {
-  console.log(`Processed message ${message.body}`)
+  console.log(`Start process message ${message.body}`)
+  await delay(2000)
+  console.log(`Install`)
+  await delay(2000)
+  console.log(`Build`)
+  await delay(2000)
+  console.log(`Test`)
+  await delay(2000)
+  console.log(`Deploy`)
+  await delay(2000)
+  console.log(`End process message ${message.body}`)
 
+  return Promise.resolve(true)
+}
+
+const delay = async (time) => {
   return new Promise((resolve) => {
     setTimeout(() => {
       resolve(true)
-    }, 1000)
+    }, time)
   })
 }
