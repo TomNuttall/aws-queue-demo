@@ -1,6 +1,11 @@
 import { handler, processMessage } from '../src'
+import { jest } from '@jest/globals'
 
 describe('handler', () => {
+  beforeAll(() => {
+    jest.useFakeTimers()
+  })
+
   it('checks succesful response for empty message', async () => {
     // Arrange
     const event = { Records: [] }
@@ -19,7 +24,10 @@ describe('processMessage', () => {
     const message = { body: '' }
 
     // Act
-    const res = await processMessage(message)
+    const promise = processMessage(message)
+    jest.runAllTimersAsync()
+
+    const res = await promise
 
     // Assert
     expect(res).toBeTruthy()

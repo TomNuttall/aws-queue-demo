@@ -1,6 +1,4 @@
 export const handler = async (event) => {
-  console.log(event)
-
   try {
     for (const message of event.Records) {
       await processMessage(message)
