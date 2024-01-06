@@ -13,8 +13,8 @@ Backend
   src='../docs/backend_diagram.png'
   raw=true
   alt='AWS Backend Architecture Diagram'
-  height="500px"
-  width="auto"
+  width="100%"
+  height="auto"
 />
 
 Frontend
@@ -22,8 +22,8 @@ Frontend
   src='../docs/frontend_diagram.png'
   raw=true
   alt='AWS Frontend Architecture Diagram'
-  height="500px"
-  width="auto"
+  width="100%"
+  height="auto"
 />
 
 ### Environment variables for lambda
