@@ -1,6 +1,5 @@
 import Header from './components/Header'
 import Home from './containers/Home'
-import './App.css'
 
 const App = () => {
   return (
