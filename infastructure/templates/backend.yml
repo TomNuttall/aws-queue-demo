@@ -32,6 +32,24 @@ Resources:
         deadLetterTargetArn: !GetAtt DeadLetterQueue.Arn
         maxReceiveCount: 2
 
+  UserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      AutoVerifiedAttributes:
+        - email
+      UsernameAttributes:
+        - email
+      UserPoolName: !Sub '${ProjectPrefix}-cognito-api-${ProjectName}'
+
+  UserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub '${ProjectPrefix}-cognito-api-${ProjectName}'
+      ExplicitAuthFlows:
+        - ALLOW_REFRESH_TOKEN_AUTH
+        - ALLOW_USER_SRP_AUTH
+      UserPoolId: !Ref UserPool
+
   Api:
     Type: 'AWS::ApiGatewayV2::Api'
     Properties:
@@ -42,6 +60,9 @@ Resources:
           - '*'
         AllowMethods:
           - POST
+        AllowHeaders:
+          - 'authorization'
+          - 'content-type'
 
   ApiCertificate:
     Type: 'AWS::CertificateManager::Certificate'
@@ -116,10 +137,25 @@ Resources:
         QueueUrl: !Ref SQSQueue
         MessageBody: $request.body
 
+  ApiAuthorizer:
+    Type: AWS::ApiGatewayV2::Authorizer
+    Properties:
+      ApiId: !Ref Api
+      AuthorizerType: JWT
+      IdentitySource:
+        - '$request.header.Authorization'
+      JwtConfiguration:
+        Audience:
+          - !Ref UserPoolClient
+        Issuer: !Sub 'https://cognito-idp.${AWS::Region}.amazonaws.com/${UserPool}'
+      Name: JwtAuthorizer
+
   ApiRoute:
     Type: 'AWS::ApiGatewayV2::Route'
     Properties:
       ApiId: !Ref Api
+      AuthorizationType: JWT
+      AuthorizerId: !Ref ApiAuthorizer
       RouteKey: 'POST /'
       Target: !Sub 'integrations/${ApiIntegration}'
     DependsOn:
