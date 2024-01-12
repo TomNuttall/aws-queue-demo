@@ -1,5 +1,5 @@
 from diagrams import Cluster, Diagram, Edge
-from diagrams.aws.security import ACM, IAM
+from diagrams.aws.security import ACM, IAM, Cognito
 from diagrams.aws.compute import Lambda
 from diagrams.aws.management import Cloudwatch, CloudwatchAlarm
 from diagrams.aws.engagement import SimpleEmailServiceSesEmail
@@ -15,17 +15,24 @@ with Diagram("", filename="backend_diagram", outformat="png"):
   with Cluster("AWS"):
     route_53 = Route53("Route53")
     iam_role_lambda = IAM("IAM")
+    cognito_userpool = Cognito("Cognito")
 
     with Cluster(""):
       api = APIGateway("API Gateway")
       lambda_sub = Lambda("Lambda")
 
-      api >> Edge(label="/ POST") >> SQS("SQS") << Edge(label="Poll") << lambda_sub
+    
+      api - ACM("ACM")
+      api >> SQS("SQS") << Edge(label="Poll") << lambda_sub
 
       lambda_sub >> Cloudwatch("Cloudwatch")
-      lambda_sub >> Edge(label="Throws Error\t\t") >> SQS("SQS (Dead Letter Queue)") << Edge(label="Check > 0 every hour") << CloudwatchAlarm("Alarm") >> SNS("SNS") >> Edge(label="Send Email") >> SimpleEmailServiceSesEmail("Email")
 
-  user >> route_53 >> api
+      with Cluster(""):
+        lambda_sub >> Edge(label="Throws Error\t\t") >> SQS("SQS (Dead Letter Queue)") << Edge(label="Check > 0 every hour") << CloudwatchAlarm("Alarm") >> SNS("SNS") >> Edge(label="Send Email") >> SimpleEmailServiceSesEmail("Email")
+
+  user >> Edge(label="/ POST\n(JWT)") >> route_53 >> api
+  user >> Edge(label="Username/Password") >> cognito_userpool
+  user << Edge(label="JWT") << cognito_userpool
 
   github_action_lambda >> iam_role_lambda
   github_action_lambda >> Edge(label="Deploys lambda") >> lambda_sub
