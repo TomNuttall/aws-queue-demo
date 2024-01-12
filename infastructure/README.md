@@ -31,6 +31,3 @@ Frontend
   height="auto"
 />
 
-### Environment variables for lambda
-
-Add `TOPIC_ARN` environment variables for the lamba.
