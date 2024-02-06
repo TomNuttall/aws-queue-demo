@@ -1,4 +1,6 @@
 import Header from './components/Header'
+import Footer from './components/Footer/Footer'
+import AuthWrapper from './context/AuthWrapper'
 import Home from './containers/Home'
 
 const App = () => {
@@ -8,7 +10,10 @@ const App = () => {
         title="Job Queue Demo Project"
         repo="https://github.com/TomNuttall/job-queue"
       />
-      <Home />
+      <AuthWrapper>
+        <Home />
+      </AuthWrapper>
+      {/* <Footer /> */}
     </>
   )
 }

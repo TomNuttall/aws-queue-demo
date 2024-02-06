@@ -40,6 +40,8 @@ Resources:
       UsernameAttributes:
         - email
       UserPoolName: !Sub '${ProjectPrefix}-cognito-api-${ProjectName}'
+      VerificationMessageTemplate:
+        DefaultEmailOption: CONFIRM_WITH_LINK
 
   UserPoolClient:
     Type: AWS::Cognito::UserPoolClient

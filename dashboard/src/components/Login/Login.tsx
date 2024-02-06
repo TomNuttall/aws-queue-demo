@@ -1,9 +1,11 @@
 import { useContext } from 'react'
 import { useForm } from 'react-hook-form'
-import { AccountContextProps, AccountContext } from '../../lib/Account'
+import { AuthContextProps, AuthContext } from '../../lib/AuthContext'
+
+import './Login.scss'
 
 type FormInputs = {
-  email: string
+  username: string
   password: string
 }
 
@@ -11,29 +13,34 @@ const Login: React.FC = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors },
+    // formState: { errors },
   } = useForm<FormInputs>()
 
-  const context = useContext<AccountContextProps>(AccountContext)
-  const onSubmit = async ({ email, password }: FormInputs) => {
-    await context.authenticate(email, password)
+  const context = useContext<AuthContextProps>(AuthContext)
+  const onSubmit = async ({ username, password }: FormInputs) => {
+    await context.authenticate(username, password)
   }
 
-  console.log('Login', errors)
-
   return (
-    <div>
+    <div className="panel">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <label htmlFor="email">Email</label>
-        <input {...register('email', { required: true })}></input>
+        <div className="panel__form">
+          <h2>Sign in</h2>
+          <div className="panel__input">
+            <label htmlFor="username">Username</label>
+            <input {...register('username', { required: true })}></input>
+          </div>
 
-        <label htmlFor="password">Password</label>
-        <input
-          type="password"
-          {...register('password', { required: true })}
-        ></input>
+          <div className="panel__input">
+            <label htmlFor="password">Password</label>
+            <input
+              type="password"
+              {...register('password', { required: true })}
+            ></input>
+          </div>
 
-        <button type="submit">Login</button>
+          <button type="submit">Login</button>
+        </div>
       </form>
     </div>
   )
