@@ -13,7 +13,7 @@ type AuthWrapperProps = {
 }
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const [signedIn, setSignedIn] = useState<boolean>(true)
+  const [signedIn, setSignedIn] = useState<boolean>(false)
   const getSession = async () => {
     return await new Promise((resolve, reject) => {
       const user = UserPool.getCurrentUser()
