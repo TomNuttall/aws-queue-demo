@@ -1,5 +1,9 @@
 import { useState } from 'react'
-import { CognitoUser, AuthenticationDetails } from 'amazon-cognito-identity-js'
+import {
+  CognitoUser,
+  AuthenticationDetails,
+  CognitoUserSession,
+} from 'amazon-cognito-identity-js'
 import { AuthContext } from '../../lib/AuthContext'
 import UserPool from '../../lib/UserPool'
 import Login from '../../components/Login'
@@ -9,12 +13,12 @@ type AuthWrapperProps = {
 }
 
 const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
-  const [signedIn, setSignedIn] = useState<boolean>(false)
+  const [signedIn, setSignedIn] = useState<boolean>(true)
   const getSession = async () => {
     return await new Promise((resolve, reject) => {
       const user = UserPool.getCurrentUser()
       if (user) {
-        user.getSession((err: any, session: any) => {
+        user.getSession((err: Error, session: CognitoUserSession | null) => {
           if (err) {
             reject()
           } else {
@@ -32,13 +36,13 @@ const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
       Username,
       Password,
     })
-    return await new Promise((resolve, reject) => {
+    return await new Promise<void>((resolve, reject) => {
       user.authenticateUser(authDetails, {
-        onSuccess: (data: any) => {
+        onSuccess: () => {
           setSignedIn(true)
-          resolve(data)
+          resolve()
         },
-        onFailure: (data: any) => {
+        onFailure: (data: Error) => {
           reject(data)
         },
       })

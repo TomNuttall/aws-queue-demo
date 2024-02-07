@@ -24,24 +24,26 @@ const StartJob: React.FC = () => {
 
   const onSubmit = async ({ jobType }: FormInputs) => {
     const session = await context.getSession()
-    const response = await fetch('https://api.jobqueue.tomnuttall.dev', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: session.accessToken.jwtToken,
-      },
-      body: jobType.valueOf(),
-    })
+    if (session) {
+      const response = await fetch('https://api.jobqueue.tomnuttall.dev', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: session.accessToken.jwtToken,
+        },
+        body: jobType.valueOf(),
+      })
 
-    const res = await response.text()
-    console.log(res)
+      const res = await response.text()
+      console.log(res)
+    }
   }
 
   return (
     <div className="panel">
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="panel__form">
-          <h2>Start Job</h2>
+          <h2>Jobs</h2>
           <div className="panel__input">
             <label htmlFor="jobType">Select job type</label>
             <div className="panel__select">

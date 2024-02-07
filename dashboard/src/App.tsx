@@ -1,5 +1,4 @@
 import Header from './components/Header'
-import Footer from './components/Footer/Footer'
 import AuthWrapper from './context/AuthWrapper'
 import Home from './containers/Home'
 
@@ -13,7 +12,6 @@ const App = () => {
       <AuthWrapper>
         <Home />
       </AuthWrapper>
-      {/* <Footer /> */}
     </>
   )
 }

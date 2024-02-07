@@ -1,1 +1,15 @@
 @import './../../form';
+
+.login {
+  &__error {
+    color: red;
+    margin: 0;
+    font-size: 0.9rem;
+    margin-top: 0.25rem;
+  }
+
+  &__submit {
+    margin-top: 0.5rem;
+    text-align: center;
+  }
+}

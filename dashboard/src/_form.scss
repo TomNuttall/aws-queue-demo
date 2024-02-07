@@ -29,9 +29,11 @@
     position: relative;
 
     &:after {
-      content: '\2304';
+      content: '\2303';
+      transform: scaleY(-1);
       pointer-events: none;
       right: 0.5rem;
+      top: 0.2rem;
       position: absolute;
     }
   }

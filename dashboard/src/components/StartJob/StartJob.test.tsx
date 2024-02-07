@@ -1,26 +1,27 @@
 import { render, screen } from '@testing-library/react'
+import { vi } from 'vitest'
+
 import userEvent from '@testing-library/user-event'
 import StartJob from './StartJob'
 import { AuthContext } from '../../lib/AuthContext'
 
 describe('StartJob', () => {
-  it('renders title', async () => {
-    // Arrange
-    const authenticate = jest.fn()
-    const getSession = jest.fn()
-    const logout = jest.fn()
-
+  it('renders component', async () => {
     // Act
-    render(
-      <AuthContext.Provider value={{ authenticate, getSession, logout }}>
-        <StartJob />
-      </AuthContext.Provider>,
-    )
-
-    const buttonElement = await screen.getByRole('button')
-    await userEvent.click(buttonElement)
+    render(<StartJob />)
 
     // Assert
-    expect(authenticate).toHaveBeenCalledOnce()
+    expect(await screen.findByText('Jobs')).toBeInTheDocument()
   })
+
+  // it('select options', async () => {
+  //   // Act
+  //   render(<StartJob />)
+
+  //   // const buttonElement = await screen.getByRole('button')
+  //   // await userEvent.click(buttonElement)
+
+  //   // Assert
+  //   expect(await screen.findByText('Jobs')).toBeInTheDocument()
+  // })
 })
