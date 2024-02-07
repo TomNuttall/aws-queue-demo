@@ -1,9 +1,5 @@
 import { render, screen } from '@testing-library/react'
-import { vi } from 'vitest'
-
-import userEvent from '@testing-library/user-event'
 import StartJob from './StartJob'
-import { AuthContext } from '../../lib/AuthContext'
 
 describe('StartJob', () => {
   it('renders component', async () => {
