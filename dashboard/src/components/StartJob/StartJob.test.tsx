@@ -1,4 +1,6 @@
+import React from 'react'
 import { render, screen } from '@testing-library/react'
+import userEvent from '@testing-library/user-event'
 import StartJob from './StartJob'
 
 describe('StartJob', () => {
@@ -14,10 +16,16 @@ describe('StartJob', () => {
   //   // Act
   //   render(<StartJob />)
 
-  //   // const buttonElement = await screen.getByRole('button')
-  //   // await userEvent.click(buttonElement)
+  //   const selectElement = await screen.findByLabelText('Select job type', {
+  //     exact: false,
+  //   })
+  //   const selectOption = screen.getByText('Add')
 
+  //   userEvent.selectOptions(selectElement, selectOption)
+
+  //   screen.debug(selectElement)
+  //   console.log(selectOption.selected)
   //   // Assert
-  //   expect(await screen.findByText('Jobs')).toBeInTheDocument()
+  //   expect(selectElement.selected).toBe(true)
   // })
 })

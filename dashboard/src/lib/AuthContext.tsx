@@ -8,9 +8,9 @@ export type AuthContextProps = {
 }
 
 const defaultAuthContext = {
-  getSession: () => Promise.resolve(),
+  getSession: () => Promise.resolve(null),
   authenticate: (_: string, __: string) => Promise.resolve(),
-  logout: () => Promise.resolve(),
+  logout: () => {},
 }
 
 export const AuthContext = createContext<AuthContextProps>(defaultAuthContext)
