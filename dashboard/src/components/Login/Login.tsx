@@ -29,37 +29,49 @@ const Login: React.FC = () => {
   }
 
   return (
-    <div className="panel login">
+    <div className="login">
       <form onSubmit={handleSubmit(onSubmit)}>
-        <div className="panel__form">
+        <div className="form">
           <h2>Sign in</h2>
 
-          <div className="panel__input">
-            <label htmlFor="username">Username</label>
+          <div className="form__input">
+            <label htmlFor="username">
+              Username <span className="form__error">*</span>
+            </label>
             <input
               id="username"
+              aria-invalid={errors.username ? 'true' : 'false'}
               {...register('username', { required: true })}
             ></input>
             {errors.username && (
-              <p className="login__error">A username is required</p>
+              <p role="alert" className="form__error">
+                A username is required
+              </p>
             )}
           </div>
 
-          <div className="panel__input">
-            <label htmlFor="password">Password</label>
+          <div className="form__input">
+            <label htmlFor="password">
+              Password <span className="form__error">*</span>
+            </label>
             <input
               id="password"
+              aria-invalid={errors.password ? 'true' : 'false'}
               type="password"
               {...register('password', { required: true })}
             ></input>
             {errors.password && (
-              <p className="login__error">A password is required</p>
+              <p role="alert" className="form__error">
+                A password is required
+              </p>
             )}
           </div>
 
           <button type="submit">Login</button>
           {loginError && (
-            <p className="login__error login__submit">{loginError}</p>
+            <p role="alert" className="form__error login__submit">
+              {loginError}
+            </p>
           )}
         </div>
       </form>

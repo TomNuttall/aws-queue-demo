@@ -1,5 +1,6 @@
+import React from 'react'
 import { render, screen } from '@testing-library/react'
-import { describe, it, expect, vi } from 'vitest'
+import { vi } from 'vitest'
 import userEvent from '@testing-library/user-event'
 import { AuthContext } from '../../lib/AuthContext'
 import Login from './Login'
@@ -20,8 +21,8 @@ describe('Login', () => {
     // Act
     render(<Login />)
 
-    const usernameField = await screen.getByRole('textbox', {
-      name: 'Username',
+    const usernameField = await screen.getByLabelText('Username', {
+      exact: false,
     })
 
     await userEvent.type(usernameField, username)
@@ -43,7 +44,9 @@ describe('Login', () => {
       </AuthContext.Provider>,
     )
 
-    const passwordField = await screen.getByLabelText('Password')
+    const passwordField = await screen.getByLabelText('Password', {
+      exact: false,
+    })
     await userEvent.type(passwordField, '123')
 
     const buttonElement = await screen.getByRole('button')
@@ -68,10 +71,14 @@ describe('Login', () => {
       </AuthContext.Provider>,
     )
 
-    const usernameField = await screen.getByLabelText('Username')
+    const usernameField = await screen.getByLabelText('Username', {
+      exact: false,
+    })
     await userEvent.type(usernameField, 'test@test.com')
 
-    const passwordField = await screen.getByLabelText('Password')
+    const passwordField = await screen.getByLabelText('Password', {
+      exact: false,
+    })
     await userEvent.type(passwordField, '123')
 
     const buttonElement = await screen.getByRole('button')
@@ -95,10 +102,14 @@ describe('Login', () => {
       </AuthContext.Provider>,
     )
 
-    const usernameField = await screen.getByLabelText('Username')
+    const usernameField = await screen.getByLabelText('Username', {
+      exact: false,
+    })
     await userEvent.type(usernameField, 'test@test.com')
 
-    const passwordField = await screen.getByLabelText('Password')
+    const passwordField = await screen.getByLabelText('Password', {
+      exact: false,
+    })
     await userEvent.type(passwordField, '123')
 
     const buttonElement = await screen.getByRole('button')
