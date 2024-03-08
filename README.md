@@ -1,9 +1,21 @@
-# Job Queue Demo Project
-Process job requests added to a queue.
+# aws-queue-demo
 
-## :bricks: Infastructure
+Demo Project: Client can add messages to a queue
 
-> :book: [Infastructure Readme](infastructure/README.md)
+## Architecture Diagram
 
-- CloudFormation templates used to deploy AWS infastructure
-- GitHub actions deploy lambda.
+<img
+  src='./diagrams/backend_diagram.png'
+  raw=true
+  alt='AWS Backend Architecture Diagram'
+  width="100%"
+  height="auto"
+/>
+
+img
+  src='./diagrams/frontend_diagram.png'
+  raw=true
+  alt='AWS Frontend Architecture Diagram'
+  width="100%"
+  height="auto"
+/>
