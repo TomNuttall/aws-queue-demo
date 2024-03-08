@@ -12,7 +12,7 @@ Demo Project: Client can add messages to a queue
   height="auto"
 />
 
-img
+<img
   src='./diagrams/frontend_diagram.png'
   raw=true
   alt='AWS Frontend Architecture Diagram'
