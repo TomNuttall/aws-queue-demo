@@ -1,9 +1,9 @@
-import StartJob from '../../components/StartJob'
+import AddJob from '../../components/AddJob'
 
 const Home = () => {
   return (
     <>
-      <StartJob />
+      <AddJob />
     </>
   )
 }

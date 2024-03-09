@@ -2,7 +2,7 @@ import { useContext } from 'react'
 import { useForm } from 'react-hook-form'
 import { AuthContextProps, AuthContext } from '../../lib/AuthContext'
 
-import './StartJob.scss'
+import './AddJob.scss'
 
 enum JobEnum {
   add = 'Job',
@@ -11,32 +11,38 @@ enum JobEnum {
 
 interface FormInputs {
   jobType: JobEnum
+  jobCount: string
 }
 
-const StartJob: React.FC = () => {
+const AddJob: React.FC = () => {
   const {
+    watch,
     register,
     handleSubmit,
     formState: { errors },
   } = useForm<FormInputs>()
 
+  const jobCount = watch('jobCount')
   const context = useContext<AuthContextProps>(AuthContext)
 
-  const onSubmit = async ({ jobType }: FormInputs) => {
-    console.log(jobType)
+  const onSubmit = async ({ jobType, jobCount }: FormInputs) => {
     const session = await context.getSession()
     if (session) {
-      const response = await fetch('https://api.jobqueue.tomnuttall.dev', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: session.getAccessToken().getJwtToken(),
-        },
-        body: jobType.valueOf(),
-      })
+      const count = parseInt(jobCount)
+      const promises = Array(count)
+        .fill(0)
+        .map((_: number, idx: number) =>
+          fetch('https://api.jobqueue.tomnuttall.dev', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              Authorization: session.getAccessToken().getJwtToken(),
+            },
+            body: jobType === JobEnum.add ? `Message ${idx}` : 'DLQ',
+          }),
+        )
 
-      const res = await response.text()
-      console.log(res)
+      await Promise.all(promises)
     }
   }
 
@@ -45,6 +51,7 @@ const StartJob: React.FC = () => {
       <form onSubmit={handleSubmit(onSubmit)}>
         <div className="form">
           <h2>Jobs</h2>
+
           <div className="form__input">
             <label htmlFor="jobType">
               Select job type <span className="form__error">*</span>
@@ -61,8 +68,8 @@ const StartJob: React.FC = () => {
                 })}
               >
                 <option value="">Select an option</option>
-                <option value="add">Add</option>
-                <option value="dlq">DLQ</option>
+                <option value={JobEnum.add}>Add to Queue</option>
+                <option value={JobEnum.dlq}>Throw to Dead Letter Queue</option>
               </select>
             </div>
             {errors.jobType && (
@@ -72,11 +79,27 @@ const StartJob: React.FC = () => {
             )}
           </div>
 
-          <button type="submit">Start Job</button>
+          <div className="form__input">
+            <label htmlFor="jobCount">Select queue amount</label>
+            <div className="form__select">
+              <select id="jobCount" {...register('jobCount')}>
+                <option disabled value="">
+                  Select an option
+                </option>
+                <option value="1">1</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit">{`Add Job${
+            jobCount === '1' ? '' : 's'
+          }`}</button>
         </div>
       </form>
     </div>
   )
 }
 
-export default StartJob
+export default AddJob

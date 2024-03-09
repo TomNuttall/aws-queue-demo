@@ -1,12 +1,12 @@
 import React from 'react'
 import { render, screen } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import StartJob from './StartJob'
+import AddJob from './AddJob'
 
-describe('StartJob', () => {
+describe('AddJob', () => {
   it('renders component', async () => {
     // Act
-    render(<StartJob />)
+    render(<AddJob />)
 
     // Assert
     expect(await screen.findByText('Jobs')).toBeInTheDocument()
