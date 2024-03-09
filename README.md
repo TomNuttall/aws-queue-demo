@@ -1,6 +1,6 @@
 # aws-queue-demo
 
-Demo Project: Client can add messages to a queue
+Demo Project: Client can add messages to a queue, lambda processes queue messages and adds to DLQ if error.
 
 ## Architecture Diagram
 
@@ -11,7 +11,6 @@ Demo Project: Client can add messages to a queue
   width="100%"
   height="auto"
 />
-
 <img
   src='./diagrams/frontend_diagram.png'
   raw=true
