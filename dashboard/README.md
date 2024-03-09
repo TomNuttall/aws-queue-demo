@@ -1,7 +1,23 @@
-## Cognito login
+# Dashboard
 
-See cognito admin for username string
+_Frontend created with Vite, React + TypeScript_
 
+## Overview
+
+- React dashboard to test adding messages to a queue.
+- Uses [React Hook Form](https://react-hook-form.com) for form validation.
+- API Route requires authentication via Cognito JWT
+
+### Run
+
+```bash
+yarn dev
 ```
-aws cognito-idp admin-set-user-password --user-pool-id ""  --username "" --password "" --permanent
+
+### Test
+
+Run unit tests
+
+```bash
+yarn test
 ```

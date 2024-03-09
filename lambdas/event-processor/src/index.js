@@ -4,7 +4,6 @@ export const handler = async (event) => {
       await processMessage(message)
     }
   } catch (err) {
-    console.error('An error occurred')
     throw err
   }
 
@@ -17,25 +16,20 @@ export const handler = async (event) => {
 }
 
 export const processMessage = async (message) => {
-  console.log(`Start process message ${message.body}`)
-  await delay(2000)
-  console.log(`Install`)
-  await delay(2000)
-  console.log(`Build`)
-  await delay(2000)
-  console.log(`Test`)
-  await delay(2000)
-  console.log(`Deploy`)
-  await delay(2000)
-  console.log(`End process message ${message.body}`)
+  if (message.body === 'DLQ') {
+    throw new Error('DLQ Test')
+  }
 
+  console.log(`Start process message ${message.body}`)
+  await delay(5000)
+  console.log(`End process message ${message.body}`)
   return Promise.resolve(true)
 }
 
 const delay = async (time) => {
   return new Promise((resolve) => {
     setTimeout(() => {
-      resolve(true)
+      resolve()
     }, time)
   })
 }

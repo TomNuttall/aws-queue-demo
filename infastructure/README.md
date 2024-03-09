@@ -6,8 +6,8 @@
   Cloudfront-cert must be used on us-east-1 region.
 - GitHub action runs on push to main branch.
   - deploy-frontend runs on change to dashboard folder
-    - Builds frontend, runs unit tests then deploys to S3 Buckets.
-    - Creates cloudfront invalidation on index.html after deploying to s3 bucket.
+    - Builds frontend, runs unit tests then deploys to S3 Bucket.
+    - Creates cloudfront invalidation on index.html after deploying to S3 bucket.
   - deploy-backend runs on change to lambda folder
     - Runs lambda unit tests then deploys Lambda.
 
@@ -30,3 +30,11 @@ Frontend
   width="100%"
   height="auto"
 />
+
+## Cognito Testing
+
+Use admin to reset username email password
+
+```
+aws cognito-idp admin-set-user-password --user-pool-id ""  --username "" --password "" --permanent
+```

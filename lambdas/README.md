@@ -1,9 +1,15 @@
-# Dashboard
+# Event Proccessor
+
+_Process SQS messages_
 
 ## Overview
 
-### Secret variables for github
+- Simple lambda function for testing a DLQ by either handlign messages ok or throwing an error
 
-Add `AWS_BUCKET_ROLE` - IAM role arn
-ADD `AWS_BUCKET` - s3://bucketname
-Add `CDN` - Cloudfront distribtuion id
+### Test
+
+Run unit tests
+
+```bash
+yarn test
+```

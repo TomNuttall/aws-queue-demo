@@ -1,5 +1,5 @@
 AWSTemplateFormatVersion: 2010-09-09
-Description: 'SNS, SQS and Lambdas'
+Description: 'UserPool, APIGatway + SQS and Lambdas'
 
 Parameters:
   ProjectPrefix:

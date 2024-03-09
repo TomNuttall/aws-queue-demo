@@ -19,6 +19,10 @@ describe('handler', () => {
 })
 
 describe('processMessage', () => {
+  beforeAll(() => {
+    jest.useFakeTimers()
+  })
+
   it('checks succesful response', async () => {
     // Arrange
     const message = { body: '' }
@@ -31,5 +35,23 @@ describe('processMessage', () => {
 
     // Assert
     expect(res).toBeTruthy()
+  })
+
+  it('throws error if DLQ', async () => {
+    // Arrange
+    const message = { body: 'DLQ' }
+
+    // Act
+    const testThrow = async () => {
+      const promise = processMessage(message)
+      jest.runAllTimersAsync()
+
+      await promise
+    }
+
+    // Assert
+    expect(async () => {
+      await testThrow()
+    }).rejects.toThrow('DLQ Test')
   })
 })
