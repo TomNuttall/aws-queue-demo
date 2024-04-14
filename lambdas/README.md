@@ -4,7 +4,7 @@ _Process SQS messages_
 
 ## Overview
 
-- Simple lambda function for testing a DLQ by either handlign messages ok or throwing an error
+- Simple lambda function for testing a DLQ by either handling messages ok or throwing an error
 
 ### Test
 
