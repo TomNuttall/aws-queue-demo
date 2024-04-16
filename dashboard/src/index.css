@@ -9,6 +9,7 @@
   --brand-error: #ff2400;
   --brand-accent: #3f51b5;
   --brand-border: darkgrey;
+  --brand-icon: #24292f;
 }
 
 [color-scheme='dark'] {
@@ -22,6 +23,7 @@
   --brand-error: #ff4b2f;
   --brand-accent: #3f51b5;
   --brand-border: darkgrey;
+  --brand-icon: white;
 }
 
 :root {
