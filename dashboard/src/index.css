@@ -39,6 +39,8 @@
 
   color: var(--brand-text);
   background-color: var(--brand-background);
+
+  color-scheme: light dark;
 }
 
 body {
