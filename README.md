@@ -6,6 +6,7 @@ Client can add messages to a queue, lambda processes queue messages and adds to 
 
 ## Architecture Diagram
 
+Backend
 <img
   src='./diagrams/backend_diagram.png'
   raw=true
@@ -13,6 +14,8 @@ Client can add messages to a queue, lambda processes queue messages and adds to 
   width="100%"
   height="auto"
 />
+
+Frontend
 <img
   src='./diagrams/frontend_diagram.png'
   raw=true
