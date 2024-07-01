@@ -1,6 +1,8 @@
 # aws-queue-demo
 
-Demo Project: Client can add messages to a queue, lambda processes queue messages and adds to DLQ if error.
+Demo Project to explore setting up queues and Cognito.
+
+Client can add messages to a queue, lambda processes queue messages and adds to DLQ if error.
 
 ## Architecture Diagram
 
