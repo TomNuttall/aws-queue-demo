@@ -16,8 +16,6 @@ yarn dev
 
 ### Test
 
-Run unit tests
-
 ```bash
 yarn test
 ```
