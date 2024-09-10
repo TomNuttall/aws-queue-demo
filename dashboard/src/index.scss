@@ -27,7 +27,7 @@
 }
 
 :root {
-  font-family: Ubuntu, system-ui, Helvetica, Arial, sans-serif;
+  font-family: system-ui, sans-serif;
   line-height: 1.5;
   font-weight: 400;
 
@@ -46,4 +46,18 @@
 body {
   margin: 0;
   padding: 0;
+}
+
+/* https://github.com/h5bp/main.css */
+.sr-only {
+  border: 0;
+  clip: rect(0, 0, 0, 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  white-space: nowrap;
+  width: 1px;
+  /* 1 */
 }
