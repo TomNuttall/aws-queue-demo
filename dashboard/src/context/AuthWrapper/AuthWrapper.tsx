@@ -8,11 +8,7 @@ import { AuthContext } from '../../lib/AuthContext'
 import UserPool from '../../lib/UserPool'
 import Login from '../../components/Login'
 
-type AuthWrapperProps = {
-  children: JSX.Element | JSX.Element[]
-}
-
-const AuthWrapper: React.FC<AuthWrapperProps> = ({ children }) => {
+const AuthWrapper: React.FC<React.PropsWithChildren> = ({ children }) => {
   const [signedIn, setSignedIn] = useState<boolean>(false)
   const getSession = async () => {
     return await new Promise<CognitoUserSession | null>((resolve, reject) => {
