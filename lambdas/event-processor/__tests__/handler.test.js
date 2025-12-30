@@ -1,9 +1,9 @@
+import { describe, it, expect, beforeAll, vi } from 'vitest'
 import { handler, processMessage } from '../src'
-import { jest } from '@jest/globals'
 
 describe('handler', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
   })
 
   it('checks succesful response for empty message', async () => {
@@ -20,7 +20,7 @@ describe('handler', () => {
 
 describe('processMessage', () => {
   beforeAll(() => {
-    jest.useFakeTimers()
+    vi.useFakeTimers()
   })
 
   it('checks succesful response', async () => {
@@ -29,7 +29,7 @@ describe('processMessage', () => {
 
     // Act
     const promise = processMessage(message)
-    jest.runAllTimersAsync()
+    vi.runAllTimersAsync()
 
     const res = await promise
 
@@ -44,7 +44,7 @@ describe('processMessage', () => {
     // Act
     const testThrow = async () => {
       const promise = processMessage(message)
-      jest.runAllTimersAsync()
+      vi.runAllTimersAsync()
 
       await promise
     }
